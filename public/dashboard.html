@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h2>Legal Automation Dashboard</h2>
+
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    Loan No: <input type="text" name="loanNo" required><br>
+    Applicant Name: <input type="text" name="applicantName" required><br>
+    Upload Khatauni: <input type="file" name="file" required><br>
+    <button type="submit">Analyze & Generate</button>
+  </form>
+</body>
+</html>
