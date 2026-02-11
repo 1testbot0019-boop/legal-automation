@@ -11,22 +11,23 @@ const auth = require("../middleware/auth");
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
-router.post("/upload", auth, upload.single("file"), async (req, res) => {
-  try {
-    const dataBuffer = fs.readFileSync(req.file.path);
-    const pdfData = await pdf(dataBuffer);
+router.post("/upload", upload.single("document"), async (req, res) => {
+    try {
+        const dataBuffer = fs.readFileSync(req.file.path);
+        const pdfData = await pdfParse(dataBuffer);
 
-    const cleaned = cleanText(pdfData.text);
-    const aiResult = await extractData(cleaned);
+        const extracted = await extractData(pdfData.text);
 
-    await Report.create({
-      loanNo: req.body.loanNo,
-      applicantName: req.body.applicantName,
-      riskLevel: aiResult.riskAnalysis.riskLevel,
-      redFlags: aiResult.riskAnalysis.redFlags,
-      yellowFlags: aiResult.riskAnalysis.yellowFlags,
-      structuredData: aiResult.structuredData
-    });
+        const filePath = await generateDocx(extracted);
+
+        res.download(filePath);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Server Error during processing");
+    }
+});
+
 
     const docPath = generateDoc(aiResult);
 
