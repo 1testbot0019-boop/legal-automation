@@ -48,12 +48,7 @@ ${text}
         console.log("AI RAW OUTPUT:");
         console.log(raw);
 
-        try {
-            return JSON.parse(raw);
-        } catch (jsonError) {
-            console.error("JSON Parse Error:", jsonError);
-            throw new Error("AI returned invalid JSON");
-        }
+        return JSON.parse(raw);
 
     } catch (error) {
         console.error("OpenAI Error:", error);
