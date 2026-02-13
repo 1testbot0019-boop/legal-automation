@@ -1,41 +1,29 @@
 const express = require("express");
-const multer = require("multer");
-const pdf = require("pdf-parse");
-const fs = require("fs");
-const extractData = require("../services/openaiService");
-const cleanText = require("../services/textCleaner");
-const generateDoc = require("../services/docxGenerator");
-const Report = require("../models/Report");
-const auth = require("../middleware/auth");
-
 const router = express.Router();
-const upload = multer({ dest: "uploads/" });
+const multer = require("multer");
+const pdfParse = require("pdf-parse");
+const extractData = require("../services/openaiService");
 
-router.post("/upload", upload.single("document"), async (req, res) => {
+const upload = multer({ storage: multer.memoryStorage() });
+
+router.post("/", upload.single("file"), async (req, res) => {
     try {
-        const dataBuffer = fs.readFileSync(req.file.path);
-        const pdfData = await pdfParse(dataBuffer);
 
-        const extracted = await extractData(pdfData.text);
+        if (!req.file) {
+            return res.status(400).send("No file uploaded");
+        }
 
-        const filePath = await generateDocx(extracted);
+        const data = await pdfParse(req.file.buffer);
+        const text = data.text;
 
-        res.download(filePath);
+        const result = await extractData(text);
 
-    } catch (error) {
-        console.error(error);
-        res.status(500).send("Server Error during processing");
+        res.json(result);
+
+    } catch (err) {
+        console.error("UPLOAD ERROR:", err);
+        res.status(500).send("Internal Server Error");
     }
-});
-
-
-    const docPath = generateDoc(aiResult);
-
-    res.download(docPath);
-
-  } catch (err) {
-    res.send("Error processing report.");
-  }
 });
 
 module.exports = router;
